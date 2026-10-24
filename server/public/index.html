@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DLS Call</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Tela de entrada ===== -->
+  <section id="screen-login" class="screen">
+    <div class="login-card">
+      <div class="brand">
+        <img src="icon.svg" alt="" width="56" height="56">
+        <h1>DLS Call</h1>
+        <p>Call de voz e tela com os amigos</p>
+      </div>
+
+      <label class="field">
+        <span>Seu nome</span>
+        <input id="in-name" maxlength="24" placeholder="Como os amigos vão te ver" autocomplete="nickname">
+      </label>
+
+      <label class="field">
+        <span>Código de convite</span>
+        <input id="in-code" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" spellcheck="false">
+      </label>
+
+      <button id="btn-join" class="btn primary big">Entrar na call</button>
+
+      <div class="divider"><span>ou</span></div>
+
+      <button id="btn-create" class="btn secondary big">Criar um convite</button>
+
+      <p id="login-error" class="error" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- ===== Tela da call ===== -->
+  <section id="screen-call" class="screen hidden">
+    <aside class="sidebar">
+      <header class="side-header">
+        <img src="icon.svg" alt="" width="22" height="22">
+        <strong>DLS Call</strong>
+      </header>
+
+      <div class="invite-box">
+        <span class="label">Convite</span>
+        <button id="btn-copy" class="invite-code" title="Copiar código">
+          <span id="lbl-code">----</span>
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+        </button>
+      </div>
+
+      <div class="channel">
+        <div class="channel-name">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 3a1 1 0 0 0-1.6-.8L5.7 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2.7l4.7 3.8A1 1 0 0 0 12 21V3zm4.5 4.2a1 1 0 0 0-1.4 1.4 4.8 4.8 0 0 1 0 6.8 1 1 0 0 0 1.4 1.4 6.8 6.8 0 0 0 0-9.6z"/></svg>
+          Geral
+        </div>
+        <ul id="member-list" class="members"></ul>
+      </div>
+
+      <div class="voice-status">
+        <div>
+          <div id="conn-status" class="conn ok">Voz conectada</div>
+          <div class="conn-sub">Geral / <span id="lbl-code-small"></span></div>
+        </div>
+        <button id="btn-leave" class="icon-btn danger" title="Sair da call">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.1 13.4a17 17 0 0 0-18.2 0 1.6 1.6 0 0 0-.6 1.9l.8 1.9a1.5 1.5 0 0 0 1.8.9l3-.8a1.5 1.5 0 0 0 1.1-1.3l.2-1.6a12 12 0 0 1 5.6 0l.2 1.6a1.5 1.5 0 0 0 1.1 1.3l3 .8a1.5 1.5 0 0 0 1.8-.9l.8-1.9a1.6 1.6 0 0 0-.6-1.9z"/></svg>
+        </button>
+      </div>
+
+      <footer class="user-panel">
+        <div class="me">
+          <div id="me-avatar" class="avatar sm"></div>
+          <div class="me-name" id="me-name"></div>
+        </div>
+        <div class="controls">
+          <button id="btn-mute" class="icon-btn" title="Silenciar microfone">
+            <svg class="on" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1a7 7 0 0 0 6-6.9h-2z"/></svg>
+            <svg class="off" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15 10.6V5a3 3 0 0 0-5.9-.8L15 10.6zM19 12h-2c0 .7-.2 1.4-.4 2l1.5 1.6A7 7 0 0 0 19 12zM4.3 3 3 4.3l6 6V12a3 3 0 0 0 4.5 2.6l1.6 1.6A5 5 0 0 1 7 12H5a7 7 0 0 0 6 6.9V22h2v-3.1c1-.1 2-.5 2.8-1l3.9 3.9 1.3-1.3L4.3 3z"/></svg>
+          </button>
+          <button id="btn-deafen" class="icon-btn" title="Desativar áudio">
+            <svg class="on" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5v-1a7 7 0 0 1 14 0v1h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z"/></svg>
+            <svg class="off" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3.3 2 2 3.3l2.4 2.4A9 9 0 0 0 3 12v7a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5v-1c0-1.3.4-2.5 1-3.6L19.7 22l1.3-1.3L3.3 2zM12 5a7 7 0 0 1 7 7v1h-2a2 2 0 0 0-1.5.7l5 5 .5.1V12a9 9 0 0 0-14-7.5l1.5 1.4A7 7 0 0 1 12 5z"/></svg>
+          </button>
+          <button id="btn-settings" class="icon-btn" title="Configurações">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6c-.6.3-1.2.6-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.1-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+          </button>
+        </div>
+      </footer>
+    </aside>
+
+    <main class="stage">
+      <div id="tiles" class="tiles"></div>
+
+      <div class="stage-bar">
+        <button id="btn-share" class="btn share">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h5v2H7v2h10v-2h-2v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 13H4V5h16v11zm-8-9-4 4h3v3h2v-3h3l-4-4z"/></svg>
+          <span>Compartilhar tela</span>
+        </button>
+      </div>
+    </main>
+  </section>
+
+  <!-- ===== Escolher o que transmitir ===== -->
+  <div id="modal-share" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <div class="modal-card wide">
+      <h2 id="share-title">Transmitir tela</h2>
+      <div id="source-tabs" class="tabs hidden">
+        <button class="tab active" data-kind="screen">Telas</button>
+        <button class="tab" data-kind="window">Janelas</button>
+      </div>
+      <div id="source-grid" class="source-grid"></div>
+      <div class="share-options">
+        <label class="field inline">
+          <span>Fluidez</span>
+          <select id="sel-fps">
+            <option value="30">720p · 30 fps (leve)</option>
+            <option value="60">720p · 60 fps (mais pesado)</option>
+          </select>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="chk-audio">
+          <span>Transmitir som do PC <small>(use fone para não dar eco)</small></span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cancelar</button>
+        <button id="btn-go-live" class="btn primary">Ao vivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Configurações ===== -->
+  <div id="modal-settings" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-card">
+      <h2 id="settings-title">Configurações</h2>
+      <label class="field">
+        <span>Microfone</span>
+        <select id="sel-mic"></select>
+      </label>
+      <div class="field">
+        <span>Teste do microfone</span>
+        <div class="meter"><div id="mic-meter"></div></div>
+      </div>
+      <label class="check">
+        <input type="checkbox" id="chk-noise" checked>
+        <span>Redução de ruído e eco</span>
+      </label>
+      <div class="modal-actions">
+        <button class="btn primary" data-close>Pronto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Volume de um amigo ===== -->
+  <div id="vol-pop" class="vol-pop hidden">
+    <div id="vol-name"></div>
+    <input id="vol-range" type="range" min="0" max="100" step="1">
+    <div id="vol-val"></div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="audio-sink" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
