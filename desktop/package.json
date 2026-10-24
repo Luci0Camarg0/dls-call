@@ -1,0 +1,51 @@
+{
+  "name": "dls-call",
+  "productName": "DLS Call",
+  "version": "1.0.0",
+  "description": "DLS Call - call de voz e tela com os amigos",
+  "author": "DLS",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.dls.call",
+    "productName": "DLS Call",
+    "files": [
+      "main.js",
+      "preload.js",
+      "loading.html",
+      "config.json",
+      "icon.png"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "electronLanguages": [
+      "pt-BR",
+      "en-US"
+    ],
+    "compression": "maximum",
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "icon.png"
+    },
+    "portable": {
+      "artifactName": "DLS-Call.exe"
+    },
+    "nsis": {
+      "artifactName": "DLS-Call-Instalador.exe",
+      "oneClick": true,
+      "shortcutName": "DLS Call"
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0"
+  }
+}
