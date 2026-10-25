@@ -101,7 +101,57 @@
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h5v2H7v2h10v-2h-2v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 13H4V5h16v11zm-8-9-4 4h3v3h2v-3h3l-4-4z"/></svg>
           <span>Compartilhar tela</span>
         </button>
+        <button id="btn-music" class="btn share">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          <span>Ouvir junto</span>
+        </button>
       </div>
+
+      <!-- ===== Ouvir junto (YouTube) ===== -->
+      <section id="music" class="music hidden" aria-label="Ouvir junto">
+        <header class="music-head">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          <strong>Ouvir junto</strong>
+          <span id="music-mini" class="music-mini"></span>
+          <button id="music-collapse" class="icon-btn sm" title="Minimizar">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 11h14v2H5z"/></svg>
+          </button>
+        </header>
+        <div class="music-body">
+          <div class="music-video">
+            <div id="yt-player"></div>
+            <div class="music-shield"></div>
+            <div id="music-empty" class="music-empty">Cole um link do YouTube aqui embaixo para tocar para todo mundo.</div>
+            <button id="music-unlock" class="btn primary music-unlock hidden">Clique para ouvir</button>
+          </div>
+          <div class="music-now">
+            <div id="music-title" class="music-title">Nada tocando</div>
+            <div id="music-by" class="music-by"></div>
+          </div>
+          <div class="music-progress">
+            <span id="music-time">0:00</span>
+            <input id="music-seek" type="range" min="0" max="100" step="1" value="0" aria-label="Posição">
+            <span id="music-dur">0:00</span>
+          </div>
+          <div class="music-controls">
+            <button id="music-toggle" class="icon-btn" title="Tocar / pausar">
+              <svg class="on" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+              <svg class="off" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+            </button>
+            <button id="music-skip" class="icon-btn" title="Pular">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/></svg>
+            </button>
+            <svg class="vol-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+            <input id="music-vol" type="range" min="0" max="100" step="1" value="50" aria-label="Volume da música">
+          </div>
+          <form id="music-form" class="music-form">
+            <input id="music-url" placeholder="Cole o link do YouTube" autocomplete="off" spellcheck="false">
+            <button class="btn primary" type="submit">Adicionar</button>
+          </form>
+          <div class="music-queue-head">Próximas <span id="music-count"></span></div>
+          <ol id="music-queue" class="music-queue"></ol>
+        </div>
+      </section>
     </main>
   </section>
 

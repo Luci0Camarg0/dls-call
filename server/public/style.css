@@ -200,6 +200,56 @@ input, select, button { font: inherit; color: inherit; }
 .btn.share.live { background: var(--red); color: #fff; }
 .btn.share.live:hover { background: var(--red-2); }
 
+.stage-bar { gap: 10px; }
+.btn.share.on { background: var(--brand); color: #fff; }
+.btn.share.on:hover { background: var(--brand-2); }
+
+/* ---------- Ouvir junto ---------- */
+.stage { position: relative; }
+.music {
+  position: absolute; right: 16px; bottom: 72px; width: 340px; z-index: 5;
+  background: var(--bg-1); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.5); overflow: hidden;
+  display: flex; flex-direction: column; max-height: calc(100% - 96px);
+}
+.music-head { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--line); }
+.music-head svg { color: var(--brand); flex-shrink: 0; }
+.music-mini { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); font-size: 12px; }
+.icon-btn.sm { width: 28px; height: 28px; }
+.music-body { display: flex; flex-direction: column; gap: 10px; padding: 12px; overflow-y: auto; }
+/* Minimizado: o player continua tocando, só some da tela */
+.music.collapsed .music-body { height: 0; padding: 0; overflow: hidden; }
+.music-video { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 8px; overflow: hidden; }
+.music-video iframe, .music-video #yt-player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.music-shield { position: absolute; inset: 0; } /* impede pausar só no seu PC clicando no vídeo */
+.music-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; text-align: center; color: var(--text-3); font-size: 13px; background: var(--bg-2); }
+.music-unlock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.music-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.music-by { font-size: 12px; color: var(--text-3); }
+.music-progress { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-2); font-family: Consolas, monospace; }
+.music-progress input { flex: 1; accent-color: var(--brand); }
+.music-controls { display: flex; align-items: center; gap: 4px; }
+.music-controls .vol-icon { color: var(--text-3); margin-left: auto; }
+.music-controls #music-vol { width: 110px; accent-color: var(--brand); }
+#music-toggle.active .on { display: none; }
+#music-toggle.active .off { display: block; color: var(--text); }
+.music-form { display: flex; gap: 6px; }
+.music-form input {
+  flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 10px; outline: none; user-select: text;
+}
+.music-form input:focus { border-color: var(--brand); }
+.music-form .btn { padding: 8px 12px; }
+.music-queue-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-3); }
+.music-queue { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.music-queue:empty::after { content: "Fila vazia"; color: var(--text-3); font-size: 12px; }
+.music-queue li { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; font-size: 13px; }
+.music-queue li:hover { background: var(--bg-2); }
+.music-queue li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.music-queue li small { color: var(--text-3); flex-shrink: 0; }
+.music-queue li button { background: none; border: 0; color: var(--text-3); cursor: pointer; padding: 2px 4px; }
+.music-queue li button:hover { color: var(--red); }
+
 /* ---------- Modais ---------- */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; padding: 16px; z-index: 10; }
 .modal-card {
@@ -253,4 +303,6 @@ input, select, button { font: inherit; color: inherit; }
   .channel { max-height: 140px; }
   .tiles { padding: 10px; grid-template-columns: 1fr; }
   .tile .tile-actions { opacity: 1; }
+  .music { left: 10px; right: 10px; width: auto; bottom: 64px; }
+  .stage-bar .btn.share span { display: none; }
 }
