@@ -12,7 +12,7 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 3000;
 const INVITE_SECRET = process.env.INVITE_SECRET || 'dls-call-segredo-padrao-troque-me';
-const MAX_PER_ROOM = 8;
+const MAX_PER_ROOM = 10;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 if (!process.env.INVITE_SECRET) {
@@ -63,18 +63,24 @@ async function getIceServers() {
   const token = process.env.CF_TURN_API_TOKEN;
   if (keyId && token) {
     if (cfCache.servers && Date.now() - cfCache.at < 12 * 3600 * 1000) return cfCache.servers;
-    try {
-      const r = await fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${keyId}/credentials/generate-ice-servers`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ttl: 86400 }),
-      });
-      const j = await r.json();
-      const list = Array.isArray(j.iceServers) ? j.iceServers : [j.iceServers];
-      cfCache = { at: Date.now(), servers: [...DEFAULT_ICE, ...list.filter(Boolean)] };
-      return cfCache.servers;
-    } catch (e) {
-      console.warn('[aviso] falha ao obter TURN da Cloudflare:', e.message);
+    // A Cloudflare tem dois endereços para isso (novo e antigo); tenta os dois.
+    for (const ep of ['generate-ice-servers', 'generate']) {
+      try {
+        const r = await fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${keyId}/credentials/${ep}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ttl: 86400 }),
+        });
+        if (!r.ok) { console.warn(`[aviso] TURN Cloudflare (${ep}) respondeu ${r.status}`); continue; }
+        const j = await r.json();
+        const list = (Array.isArray(j.iceServers) ? j.iceServers : [j.iceServers]).filter(Boolean);
+        if (!list.length) continue;
+        cfCache = { at: Date.now(), servers: [...DEFAULT_ICE, ...list] };
+        console.log('[ok] TURN da Cloudflare ativo');
+        return cfCache.servers;
+      } catch (e) {
+        console.warn('[aviso] falha ao obter TURN da Cloudflare:', e.message);
+      }
     }
   }
   return DEFAULT_ICE;
