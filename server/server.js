@@ -135,6 +135,99 @@ function cleanName(n) {
   return s || 'Amigo';
 }
 
+// ---------- Ouvir junto (YouTube) ----------
+// O servidor guarda "o que está tocando e em que segundo"; cada PC toca o vídeo
+// no próprio player do YouTube e se acerta por essa referência.
+const musicByRoom = new Map(); // código -> estado
+const titleCache = new Map();
+const MAX_QUEUE = 50;
+
+function youtubeId(input) {
+  const s = String(input || '').trim();
+  if (/^[\w-]{11}$/.test(s)) return s;
+  let u;
+  try { u = new URL(s); } catch { return null; }
+  const host = u.hostname.replace(/^(www\.|m\.|music\.)/, '');
+  let id = null;
+  if (host === 'youtu.be') id = u.pathname.slice(1, 12);
+  else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    id = u.searchParams.get('v');
+    const m = u.pathname.match(/^\/(?:shorts|embed|live|v)\/([\w-]{11})/);
+    if (!id && m) id = m[1];
+  }
+  return id && /^[\w-]{11}$/.test(id) ? id : null;
+}
+
+async function youtubeTitle(id) {
+  if (titleCache.has(id)) return titleCache.get(id);
+  try {
+    const r = await fetch(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=${id}`,
+      { signal: AbortSignal.timeout(4000) });
+    if (r.ok) {
+      const t = String((await r.json()).title || '').slice(0, 120);
+      if (t) { titleCache.set(id, t); return t; }
+    }
+  } catch {}
+  return 'Vídeo do YouTube';
+}
+
+function music(code) {
+  let m = musicByRoom.get(code);
+  if (!m) {
+    m = { queue: [], current: null, playing: false, position: 0, updatedAt: Date.now() };
+    musicByRoom.set(code, m);
+  }
+  return m;
+}
+
+function musicPos(m) {
+  return m.playing ? m.position + (Date.now() - m.updatedAt) / 1000 : m.position;
+}
+
+function setMusicPos(m, pos, playing) {
+  m.position = Math.max(0, pos);
+  m.playing = playing;
+  m.updatedAt = Date.now();
+}
+
+function nextTrack(m) {
+  m.current = m.queue.shift() || null;
+  setMusicPos(m, 0, !!m.current);
+}
+
+function musicMsg(m) {
+  return { type: 'music', state: m, now: Date.now() };
+}
+
+async function handleMusic(me, room, msg) {
+  const m = music(me.room);
+  const a = msg.action;
+  if (a === 'add') {
+    const id = youtubeId(msg.url);
+    if (!id) return send(me.ws, { type: 'toast', message: 'Link do YouTube inválido.' });
+    if (m.queue.length >= MAX_QUEUE) return send(me.ws, { type: 'toast', message: 'A fila está cheia.' });
+    const item = { key: crypto.randomBytes(4).toString('hex'), id, title: await youtubeTitle(id), by: me.name };
+    if (!m.current) { m.current = item; setMusicPos(m, 0, true); }
+    else m.queue.push(item);
+  } else if (a === 'toggle' && m.current) {
+    setMusicPos(m, musicPos(m), !m.playing);
+  } else if (a === 'seek' && m.current) {
+    setMusicPos(m, Number(msg.t) || 0, m.playing);
+  } else if (a === 'skip') {
+    nextTrack(m);
+  } else if ((a === 'ended' || a === 'error') && m.current && m.current.key === msg.key) {
+    // Vários PCs avisam que acabou; só o primeiro aviso daquela música conta.
+    nextTrack(m);
+  } else if (a === 'remove') {
+    m.queue = m.queue.filter((x) => x.key !== msg.key);
+  } else if (a === 'clear') {
+    m.queue = [];
+    m.current = null;
+    setMusicPos(m, 0, false);
+  } else return;
+  for (const p of room.values()) send(p.ws, musicMsg(m));
+}
+
 wss.on('connection', (ws) => {
   ws.alive = true;
   ws.on('pong', () => { ws.alive = true; });
@@ -163,6 +256,7 @@ wss.on('connection', (ws) => {
       room.set(me.id, me);
       rooms.set(code, room);
       send(ws, { type: 'welcome', id: me.id, code, peers, iceServers: await getIceServers() });
+      if (musicByRoom.has(code)) send(ws, musicMsg(musicByRoom.get(code)));
       for (const p of room.values()) {
         if (p.id !== me.id) send(p.ws, { type: 'peer-joined', id: me.id, name: me.name, state: me.state });
       }
@@ -185,6 +279,8 @@ wss.on('connection', (ws) => {
       for (const p of room.values()) {
         if (p.id !== me.id) send(p.ws, { type: 'state', id: me.id, state: me.state });
       }
+    } else if (msg.type === 'music') {
+      await handleMusic(me, room, msg);
     }
   });
 
@@ -193,7 +289,7 @@ wss.on('connection', (ws) => {
     const room = rooms.get(me.room);
     if (!room) return;
     room.delete(me.id);
-    if (room.size === 0) rooms.delete(me.room);
+    if (room.size === 0) { rooms.delete(me.room); musicByRoom.delete(me.room); }
     else for (const p of room.values()) send(p.ws, { type: 'peer-left', id: me.id });
   });
 });
