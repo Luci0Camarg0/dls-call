@@ -8,64 +8,81 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="wallpaper" class="wallpaper"></div>
+  <div id="wall-dim" class="wall-dim"></div>
 
-  <!-- ===== Tela de entrada ===== -->
-  <section id="screen-login" class="screen">
-    <div class="login-card">
+  <!-- ===== Carregando ===== -->
+  <section id="screen-boot" class="screen boot">
+    <img src="icon.svg" alt="" width="56" height="56">
+    <p>Carregando…</p>
+  </section>
+
+  <!-- ===== Login / cadastro ===== -->
+  <section id="screen-auth" class="screen auth hidden">
+    <form id="auth-form" class="auth-card" autocomplete="on">
       <div class="brand">
         <img src="icon.svg" alt="" width="56" height="56">
         <h1>DLS Call</h1>
-        <p>Call de voz e tela com os amigos</p>
+        <p id="auth-sub">Que bom te ver de novo!</p>
       </div>
-
+      <div class="tabs auth-tabs">
+        <button type="button" class="tab active" data-mode="login">Entrar</button>
+        <button type="button" class="tab" data-mode="register">Criar conta</button>
+      </div>
       <label class="field">
-        <span>Seu nome</span>
-        <input id="in-name" maxlength="24" placeholder="Como os amigos vão te ver" autocomplete="nickname">
+        <span>Usuário</span>
+        <input id="in-user" name="username" maxlength="20" autocomplete="username" spellcheck="false" required>
       </label>
-
+      <label class="field register-only hidden">
+        <span>Nome de exibição</span>
+        <input id="in-display" maxlength="32" placeholder="Como os amigos vão te ver">
+      </label>
       <label class="field">
-        <span>Código de convite</span>
-        <input id="in-code" maxlength="9" placeholder="XXXX-XXXX" autocomplete="off" spellcheck="false">
+        <span>Senha</span>
+        <input id="in-pass" name="password" type="password" maxlength="100" autocomplete="current-password" required>
       </label>
-
-      <button id="btn-join" class="btn primary big">Entrar na call</button>
-
-      <div class="divider"><span>ou</span></div>
-
-      <button id="btn-create" class="btn secondary big">Criar um convite</button>
-
-      <p id="login-error" class="error" role="alert"></p>
-    </div>
+      <button id="btn-auth" class="btn primary big" type="submit">Entrar</button>
+      <p id="auth-error" class="error" role="alert"></p>
+      <p class="hint register-only hidden">Usuário: 3 a 20 letras, números, _ ou ponto. Senha: pelo menos 6 caracteres. Anote sua senha: não dá para recuperar.</p>
+    </form>
   </section>
 
-  <!-- ===== Tela da call ===== -->
-  <section id="screen-call" class="screen hidden">
+  <!-- ===== App ===== -->
+  <section id="screen-app" class="screen app hidden">
+    <!-- Barra de servidores -->
+    <nav class="rail" aria-label="Servidores">
+      <div id="rail-servers" class="rail-servers"></div>
+      <button id="btn-add-server" class="rail-btn add" title="Criar ou entrar em um servidor">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+      </button>
+    </nav>
+
+    <!-- Canais -->
     <aside class="sidebar">
       <header class="side-header">
-        <img src="icon.svg" alt="" width="22" height="22">
-        <strong>DLS Call</strong>
+        <button id="btn-server-menu" class="server-title" title="Configurações do servidor">
+          <span id="server-name">DLS Call</span>
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6c-.6.3-1.2.6-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.1-1.6zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+        </button>
       </header>
 
-      <div class="invite-box">
-        <span class="label">Convite</span>
-        <button id="btn-copy" class="invite-code" title="Copiar código">
-          <span id="lbl-code">----</span>
-          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+      <div class="channels">
+        <div class="chan-group">Canais de texto</div>
+        <button id="chan-chat" class="channel-btn">
+          <span class="hash">#</span><span>chat</span><span id="chat-unread" class="unread-dot hidden"></span>
         </button>
-      </div>
-
-      <div class="channel">
-        <div class="channel-name">
+        <div class="chan-group">Canais de voz</div>
+        <button id="chan-voice" class="channel-btn">
           <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 3a1 1 0 0 0-1.6-.8L5.7 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2.7l4.7 3.8A1 1 0 0 0 12 21V3zm4.5 4.2a1 1 0 0 0-1.4 1.4 4.8 4.8 0 0 1 0 6.8 1 1 0 0 0 1.4 1.4 6.8 6.8 0 0 0 0-9.6z"/></svg>
-          Geral
-        </div>
-        <ul id="member-list" class="members"></ul>
+          <span>Geral</span>
+        </button>
+        <ul id="voice-list" class="voice-list"></ul>
       </div>
 
-      <div class="voice-status">
-        <div>
+      <div id="voice-status" class="voice-status hidden">
+        <div class="vs-info">
           <div id="conn-status" class="conn ok">Voz conectada</div>
-          <div class="conn-sub">Geral / <span id="lbl-code-small"></span></div>
+          <div id="conn-sub" class="conn-sub"></div>
         </div>
         <button id="btn-leave" class="icon-btn danger" title="Sair da call">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.1 13.4a17 17 0 0 0-18.2 0 1.6 1.6 0 0 0-.6 1.9l.8 1.9a1.5 1.5 0 0 0 1.8.9l3-.8a1.5 1.5 0 0 0 1.1-1.3l.2-1.6a12 12 0 0 1 5.6 0l.2 1.6a1.5 1.5 0 0 0 1.1 1.3l3 .8a1.5 1.5 0 0 0 1.8-.9l.8-1.9a1.6 1.6 0 0 0-.6-1.9z"/></svg>
@@ -73,10 +90,13 @@
       </div>
 
       <footer class="user-panel">
-        <div class="me">
-          <div id="me-avatar" class="avatar sm"></div>
-          <div class="me-name" id="me-name"></div>
-        </div>
+        <button id="me-card" class="me" title="Meu perfil">
+          <span id="me-avatar" class="av-slot"></span>
+          <span class="me-text">
+            <span id="me-name" class="me-name"></span>
+            <span id="me-user" class="me-user"></span>
+          </span>
+        </button>
         <div class="controls">
           <button id="btn-mute" class="icon-btn" title="Silenciar microfone">
             <svg class="on" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1a7 7 0 0 0 6-6.9h-2z"/></svg>
@@ -93,67 +113,294 @@
       </footer>
     </aside>
 
-    <main class="stage">
-      <div id="tiles" class="tiles"></div>
-
-      <div class="stage-bar">
-        <button id="btn-share" class="btn share">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h5v2H7v2h10v-2h-2v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 13H4V5h16v11zm-8-9-4 4h3v3h2v-3h3l-4-4z"/></svg>
-          <span>Compartilhar tela</span>
+    <!-- Conteúdo -->
+    <main class="main">
+      <header class="main-head">
+        <span id="head-icon" class="hash">#</span>
+        <strong id="head-title">chat</strong>
+        <span class="spacer"></span>
+        <button id="btn-members" class="icon-btn" title="Mostrar membros">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.8 2 2 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>
         </button>
-        <button id="btn-music" class="btn share">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-          <span>Ouvir junto</span>
+      </header>
+
+      <div class="main-body">
+        <!-- Sem servidor -->
+        <div id="view-empty" class="view view-empty hidden">
+          <div class="empty-card">
+            <img src="icon.svg" alt="" width="64" height="64">
+            <h2>Bem-vindo ao DLS Call!</h2>
+            <p>Crie um servidor para a galera ou entre em um com o código de convite.</p>
+            <button id="btn-empty-add" class="btn primary">Criar ou entrar em um servidor</button>
+          </div>
+        </div>
+
+        <!-- Chat -->
+        <div id="view-chat" class="view view-chat">
+          <div id="chat-scroll" class="chat-scroll">
+            <div id="chat-top" class="chat-top"></div>
+            <div id="chat-list" class="chat-list"></div>
+          </div>
+          <form id="chat-form" class="chat-form">
+            <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Conversar em #chat"></textarea>
+            <button class="icon-btn send" type="submit" title="Enviar">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- Call -->
+        <div id="view-voice" class="view view-voice">
+          <div id="voice-join-card" class="voice-join hidden">
+            <div class="empty-card">
+              <h2>🔊 Geral</h2>
+              <p id="voice-join-text">Ninguém na call ainda.</p>
+              <button id="btn-voice-join" class="btn primary">Entrar na call</button>
+            </div>
+          </div>
+          <div id="tiles" class="tiles"></div>
+
+          <div class="stage-bar" id="stage-bar">
+            <button id="btn-share" class="btn share">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20 3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h5v2H7v2h10v-2h-2v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 13H4V5h16v11zm-8-9-4 4h3v3h2v-3h3l-4-4z"/></svg>
+              <span>Compartilhar tela</span>
+            </button>
+            <button id="btn-music" class="btn share">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+              <span>Ouvir junto</span>
+            </button>
+            <button id="btn-soundpad" class="btn share">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>
+              <span>Soundpad</span>
+            </button>
+          </div>
+
+          <!-- Ouvir junto (YouTube) -->
+          <section id="music" class="float-panel music hidden" aria-label="Ouvir junto">
+            <header class="panel-head">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+              <strong>Ouvir junto</strong>
+              <span id="music-mini" class="music-mini"></span>
+              <button id="music-collapse" class="icon-btn sm" title="Minimizar">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 11h14v2H5z"/></svg>
+              </button>
+            </header>
+            <div class="panel-body">
+              <div class="music-video">
+                <div id="yt-player"></div>
+                <div class="music-shield"></div>
+                <div id="music-empty" class="music-empty">Cole um link do YouTube aqui embaixo para tocar para todo mundo.</div>
+                <button id="music-unlock" class="btn primary music-unlock hidden">Clique para ouvir</button>
+              </div>
+              <div class="music-now">
+                <div id="music-title" class="music-title">Nada tocando</div>
+                <div id="music-by" class="music-by"></div>
+              </div>
+              <div class="music-progress">
+                <span id="music-time">0:00</span>
+                <input id="music-seek" type="range" min="0" max="100" step="1" value="0" aria-label="Posição">
+                <span id="music-dur">0:00</span>
+              </div>
+              <div class="music-controls">
+                <button id="music-toggle" class="icon-btn" title="Tocar / pausar">
+                  <svg class="on" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                  <svg class="off" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+                </button>
+                <button id="music-skip" class="icon-btn" title="Pular">
+                  <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/></svg>
+                </button>
+                <svg class="vol-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+                <input id="music-vol" type="range" min="0" max="100" step="1" value="50" aria-label="Volume da música">
+              </div>
+              <form id="music-form" class="inline-form">
+                <input id="music-url" placeholder="Cole o link do YouTube" autocomplete="off" spellcheck="false">
+                <button class="btn primary" type="submit">Adicionar</button>
+              </form>
+              <div class="panel-sub">Próximas <span id="music-count"></span></div>
+              <ol id="music-queue" class="music-queue"></ol>
+            </div>
+          </section>
+
+          <!-- Soundpad -->
+          <section id="soundpad" class="float-panel soundpad hidden" aria-label="Soundpad">
+            <header class="panel-head">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>
+              <strong>Soundpad</strong>
+              <span class="spacer"></span>
+              <button id="sp-close" class="icon-btn sm" title="Fechar">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+              </button>
+            </header>
+            <div class="panel-body">
+              <div id="sp-grid" class="sp-grid"></div>
+              <div class="sp-foot">
+                <label class="btn secondary sp-add">
+                  + Adicionar som
+                  <input id="sp-file" type="file" accept="audio/*" hidden>
+                </label>
+                <svg class="vol-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+                <input id="sp-vol" type="range" min="0" max="100" step="1" value="70" aria-label="Volume do soundpad">
+              </div>
+              <p id="sp-hint" class="hint"></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Membros -->
+    <aside id="members-panel" class="members-panel">
+      <div id="members-list"></div>
+    </aside>
+  </section>
+
+  <!-- ===== Criar / entrar em servidor ===== -->
+  <div id="modal-add" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="add-title">
+    <div class="modal-card">
+      <h2 id="add-title">Adicionar servidor</h2>
+      <form id="form-join" class="stack">
+        <label class="field">
+          <span>Entrar com código de convite</span>
+          <input id="in-join-code" maxlength="9" placeholder="XXXX-XXXX" class="code-input" autocomplete="off" spellcheck="false">
+        </label>
+        <button class="btn primary" type="submit">Entrar no servidor</button>
+      </form>
+      <div class="divider"><span>ou</span></div>
+      <form id="form-create" class="stack">
+        <label class="field">
+          <span>Criar um servidor novo</span>
+          <input id="in-create-name" maxlength="40" placeholder="Nome do servidor">
+        </label>
+        <button class="btn secondary" type="submit">Criar servidor</button>
+      </form>
+      <p id="add-error" class="error"></p>
+      <div class="modal-actions"><button class="btn ghost" data-close>Cancelar</button></div>
+    </div>
+  </div>
+
+  <!-- ===== Configurações do servidor ===== -->
+  <div id="modal-server" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="srv-title">
+    <div class="modal-card">
+      <h2 id="srv-title">Configurações do servidor</h2>
+      <div class="srv-row">
+        <label class="srv-icon-pick" title="Trocar ícone">
+          <span id="srv-icon-preview" class="srv-icon big"></span>
+          <span class="pick-hint">Trocar</span>
+          <input id="srv-icon-file" type="file" accept="image/*" hidden>
+        </label>
+        <label class="field grow">
+          <span>Nome do servidor</span>
+          <input id="srv-name" maxlength="40">
+        </label>
+      </div>
+      <div class="field">
+        <span>Código de convite</span>
+        <button id="srv-invite" class="invite-code" title="Copiar código">
+          <span id="srv-invite-code">----</span>
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
         </button>
       </div>
+      <p id="srv-error" class="error"></p>
+      <div class="modal-actions spread">
+        <button id="srv-leave" class="btn danger-ghost">Sair do servidor</button>
+        <span>
+          <button class="btn ghost" data-close>Fechar</button>
+          <button id="srv-save" class="btn primary">Salvar</button>
+        </span>
+      </div>
+    </div>
+  </div>
 
-      <!-- ===== Ouvir junto (YouTube) ===== -->
-      <section id="music" class="music hidden" aria-label="Ouvir junto">
-        <header class="music-head">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-          <strong>Ouvir junto</strong>
-          <span id="music-mini" class="music-mini"></span>
-          <button id="music-collapse" class="icon-btn sm" title="Minimizar">
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 11h14v2H5z"/></svg>
-          </button>
-        </header>
-        <div class="music-body">
-          <div class="music-video">
-            <div id="yt-player"></div>
-            <div class="music-shield"></div>
-            <div id="music-empty" class="music-empty">Cole um link do YouTube aqui embaixo para tocar para todo mundo.</div>
-            <button id="music-unlock" class="btn primary music-unlock hidden">Clique para ouvir</button>
+  <!-- ===== Configurações do usuário ===== -->
+  <div id="modal-settings" class="modal settings-modal hidden" role="dialog" aria-modal="true" aria-label="Configurações">
+    <div class="settings-card">
+      <nav class="settings-nav">
+        <div class="nav-group">Configurações</div>
+        <button class="nav-item active" data-tab="profile">Meu perfil</button>
+        <button class="nav-item" data-tab="look">Aparência</button>
+        <button class="nav-item" data-tab="audio">Voz e áudio</button>
+        <div class="nav-sep"></div>
+        <button id="btn-logout" class="nav-item danger">Sair da conta</button>
+      </nav>
+      <div class="settings-body">
+        <button class="icon-btn settings-close" data-close title="Fechar (Esc)">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+        </button>
+
+        <section class="tab-pane" data-pane="profile">
+          <h2>Meu perfil</h2>
+          <div class="profile-edit">
+            <div id="pe-preview" class="profile-card preview"></div>
+            <div class="pe-controls">
+              <label class="field">
+                <span>Nome de exibição</span>
+                <input id="pe-name" maxlength="32">
+              </label>
+              <div class="field">
+                <span>Foto de perfil (imagem ou GIF)</span>
+                <div class="btn-row">
+                  <label class="btn secondary">Trocar foto<input id="pe-avatar" type="file" accept="image/*" hidden></label>
+                  <button id="pe-avatar-rm" class="btn ghost">Remover</button>
+                </div>
+              </div>
+              <div class="field">
+                <span>Banner (imagem, GIF ou cor)</span>
+                <div class="btn-row">
+                  <label class="btn secondary">Trocar imagem<input id="pe-banner" type="file" accept="image/*" hidden></label>
+                  <label class="color-pick" title="Cor do banner"><input id="pe-color" type="color" value="#7b6cff"> Cor</label>
+                  <button id="pe-banner-rm" class="btn ghost">Remover</button>
+                </div>
+              </div>
+              <button id="pe-save" class="btn primary">Salvar nome</button>
+              <p id="pe-msg" class="hint"></p>
+            </div>
           </div>
-          <div class="music-now">
-            <div id="music-title" class="music-title">Nada tocando</div>
-            <div id="music-by" class="music-by"></div>
+        </section>
+
+        <section class="tab-pane hidden" data-pane="look">
+          <h2>Aparência</h2>
+          <div class="field">
+            <span>Wallpaper</span>
+            <div id="wp-preview" class="wp-preview"><span>Sem wallpaper</span></div>
+            <div class="btn-row">
+              <label class="btn secondary">Escolher imagem<input id="wp-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+              <button id="wp-rm" class="btn ghost">Remover</button>
+            </div>
           </div>
-          <div class="music-progress">
-            <span id="music-time">0:00</span>
-            <input id="music-seek" type="range" min="0" max="100" step="1" value="0" aria-label="Posição">
-            <span id="music-dur">0:00</span>
+          <label class="field">
+            <span>Desfoque: <b id="wp-blur-val">0</b> px</span>
+            <input id="wp-blur" type="range" min="0" max="40" step="1" value="8">
+          </label>
+          <label class="field">
+            <span>Escurecer: <b id="wp-dim-val">0</b>%</span>
+            <input id="wp-dim" type="range" min="0" max="90" step="1" value="40">
+          </label>
+          <p class="hint">O wallpaper fica salvo na sua conta e aparece em qualquer PC que você entrar.</p>
+        </section>
+
+        <section class="tab-pane hidden" data-pane="audio">
+          <h2>Voz e áudio</h2>
+          <label class="field">
+            <span>Microfone</span>
+            <select id="sel-mic"></select>
+          </label>
+          <div class="field">
+            <span>Teste do microfone (fale algo)</span>
+            <div class="meter"><div id="mic-meter"></div></div>
           </div>
-          <div class="music-controls">
-            <button id="music-toggle" class="icon-btn" title="Tocar / pausar">
-              <svg class="on" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-              <svg class="off" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
-            </button>
-            <button id="music-skip" class="icon-btn" title="Pular">
-              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/></svg>
-            </button>
-            <svg class="vol-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
-            <input id="music-vol" type="range" min="0" max="100" step="1" value="50" aria-label="Volume da música">
-          </div>
-          <form id="music-form" class="music-form">
-            <input id="music-url" placeholder="Cole o link do YouTube" autocomplete="off" spellcheck="false">
-            <button class="btn primary" type="submit">Adicionar</button>
-          </form>
-          <div class="music-queue-head">Próximas <span id="music-count"></span></div>
-          <ol id="music-queue" class="music-queue"></ol>
-        </div>
-      </section>
-    </main>
-  </section>
+          <label class="field">
+            <span>Saída de som (fone / caixa)</span>
+            <select id="sel-out"></select>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="chk-noise" checked>
+            <span>Redução de ruído e eco</span>
+          </label>
+          <p id="audio-msg" class="hint">As escolhas ficam salvas neste PC.</p>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== Escolher o que transmitir ===== -->
   <div id="modal-share" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="share-title">
@@ -174,7 +421,7 @@
         </label>
         <label class="check">
           <input type="checkbox" id="chk-audio">
-          <span>Transmitir som do PC <small>(use fone para não dar eco)</small></span>
+          <span>Transmitir som do PC</span>
         </label>
       </div>
       <div class="modal-actions">
@@ -184,27 +431,39 @@
     </div>
   </div>
 
-  <!-- ===== Configurações ===== -->
-  <div id="modal-settings" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <!-- ===== Tecla de atalho do soundpad ===== -->
+  <div id="modal-bind" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="bind-title">
     <div class="modal-card">
-      <h2 id="settings-title">Configurações</h2>
-      <label class="field">
-        <span>Microfone</span>
-        <select id="sel-mic"></select>
-      </label>
-      <div class="field">
-        <span>Teste do microfone</span>
-        <div class="meter"><div id="mic-meter"></div></div>
-      </div>
-      <label class="check">
-        <input type="checkbox" id="chk-noise" checked>
-        <span>Redução de ruído e eco</span>
-      </label>
-      <div class="modal-actions">
-        <button class="btn primary" data-close>Pronto</button>
+      <h2 id="bind-title">Tecla para "<span id="bind-name"></span>"</h2>
+      <div id="bind-key" class="bind-key">Aperte a tecla…</div>
+      <p class="hint">Use F1–F12, as teclas do teclado numérico ou uma combinação com Ctrl / Alt / Shift (ex.: Ctrl+1). No app, funciona até com o jogo aberto.</p>
+      <p id="bind-error" class="error"></p>
+      <div class="modal-actions spread">
+        <button id="bind-clear" class="btn danger-ghost">Remover tecla</button>
+        <button class="btn ghost" data-close>Cancelar</button>
       </div>
     </div>
   </div>
+
+  <!-- ===== Nome do som ===== -->
+  <div id="modal-sound" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="snd-title">
+    <form id="form-sound" class="modal-card">
+      <h2 id="snd-title">Adicionar som</h2>
+      <label class="field">
+        <span>Nome do som</span>
+        <input id="snd-name" maxlength="32" required>
+      </label>
+      <p id="snd-info" class="hint"></p>
+      <p id="snd-error" class="error"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" data-close>Cancelar</button>
+        <button id="snd-send" class="btn primary" type="submit">Enviar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Cartão de perfil ===== -->
+  <div id="profile-pop" class="profile-pop hidden"></div>
 
   <!-- ===== Volume de um amigo ===== -->
   <div id="vol-pop" class="vol-pop hidden">
@@ -216,6 +475,11 @@
   <div id="toast" class="toast hidden"></div>
   <div id="audio-sink" hidden></div>
 
+  <script src="core.js"></script>
+  <script src="voice.js"></script>
+  <script src="music.js"></script>
+  <script src="soundpad.js"></script>
+  <script src="chat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
