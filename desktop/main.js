@@ -1,7 +1,7 @@
 // DLS Call — app de desktop (.exe)
 // É uma janela leve que abre o site do seu servidor e adiciona o seletor de tela do Windows.
 
-const { app, BrowserWindow, session, desktopCapturer, ipcMain, shell, Menu, net } = require('electron');
+const { app, BrowserWindow, session, desktopCapturer, ipcMain, shell, Menu, net, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -10,10 +10,13 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+// Tira o som do próprio app da captura de "som do PC" quando o Chromium permitir.
+if (!process.env.DLS_NO_RESTRICT) app.commandLine.appendSwitch('enable-features', 'RestrictOwnAudio');
 
 // Endereço do servidor: um arquivo "servidor.txt" ao lado do .exe tem prioridade
 // (assim dá para trocar sem recompilar); senão vale o config.json embutido.
 function readServerUrl() {
+  if (process.env.DLS_SERVER) return process.env.DLS_SERVER; // para testes
   const exeDir = process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath);
   for (const f of [path.join(exeDir, 'servidor.txt'), path.join(__dirname, 'servidor.txt')]) {
     try {
@@ -31,6 +34,8 @@ let win = null;
 let lastSources = [];
 let chosen = null;
 
+// Para testes: DLS_PROFILE abre uma segunda cópia do app com outra conta.
+if (process.env.DLS_PROFILE) app.setPath('userData', path.join(app.getPath('appData'), 'DLS Call ' + process.env.DLS_PROFILE));
 if (!app.requestSingleInstanceLock()) app.quit();
 app.on('second-instance', () => {
   if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
@@ -66,6 +71,21 @@ ipcMain.handle('dls:select-source', (e, id, audio) => {
   const source = lastSources.find((s) => s.id === id);
   chosen = source ? { source, audio: !!audio } : null;
 });
+
+// Atalhos do soundpad: funcionam mesmo com outro programa (jogo) em foco.
+ipcMain.handle('dls:set-hotkeys', (e, list) => {
+  if (!fromServer(e)) return [];
+  globalShortcut.unregisterAll();
+  const ok = [];
+  for (const accel of (Array.isArray(list) ? list : []).slice(0, 60)) {
+    try {
+      if (globalShortcut.register(String(accel), () => win?.webContents.send('dls:hotkey', accel))) ok.push(accel);
+    } catch {}
+  }
+  return ok;
+});
+
+app.on('will-quit', () => globalShortcut.unregisterAll());
 
 function setupSession() {
   const ses = session.defaultSession;
@@ -150,6 +170,8 @@ function createWindow() {
     if (isMainFrame && code !== -3 && url.startsWith(SERVER)) setTimeout(openServer, 1500);
   });
   win.webContents.on('render-process-gone', () => setTimeout(openServer, 1000));
+  // Página recarregou: solta os atalhos (a página registra de novo quando entrar na call).
+  win.webContents.on('did-start-navigation', (e) => { if (e.isMainFrame) globalShortcut.unregisterAll(); });
 
   openServer();
 }
