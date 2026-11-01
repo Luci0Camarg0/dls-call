@@ -204,7 +204,7 @@ function renderSoundpad() {
   const grid = $('#sp-grid');
   grid.innerHTML = '';
   if (!SP.sounds.length) {
-    grid.append(h('p', { class: 'hint', text: 'Nenhum som ainda. Adicione um de até 10 segundos!' }));
+    grid.append(h('p', { class: 'hint', text: 'Nenhum som ainda. Adicione um! Sons longos são cortados nos primeiros 10 segundos.' }));
     return;
   }
   const b = binds();
@@ -246,23 +246,53 @@ $('#sp-vol').addEventListener('input', (e) => {
 // ---------- adicionar som ----------
 const AUDIO_EXT = { mp3: 'audio/mpeg', ogg: 'audio/ogg', wav: 'audio/wav', webm: 'audio/webm', m4a: 'audio/mp4', aac: 'audio/aac', flac: 'audio/flac', opus: 'audio/ogg' };
 
+const MAX_SOUND_SECONDS = 10;
+
+// Pega só o começo do som (até 10 s), em mono, e gera um WAV pequeno.
+// Um "fade" curtinho no final evita o estalo do corte.
+async function trimToWav(buffer, seconds) {
+  const rate = 44100;
+  const length = Math.ceil(seconds * rate);
+  const off = new OfflineAudioContext(1, length, rate);
+  const src = off.createBufferSource();
+  const gain = off.createGain();
+  src.buffer = buffer;
+  gain.gain.setValueAtTime(1, Math.max(0, seconds - 0.05));
+  gain.gain.linearRampToValueAtTime(0, seconds);
+  src.connect(gain).connect(off.destination);
+  src.start(0, 0, seconds);
+  const pcm = (await off.startRendering()).getChannelData(0);
+  const out = new DataView(new ArrayBuffer(44 + pcm.length * 2));
+  const text = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+  text(0, 'RIFF'); out.setUint32(4, 36 + pcm.length * 2, true); text(8, 'WAVE');
+  text(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+  out.setUint32(24, rate, true); out.setUint32(28, rate * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
+  text(36, 'data'); out.setUint32(40, pcm.length * 2, true);
+  for (let i = 0; i < pcm.length; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 0x7fff, true);
+  return new Blob([out.buffer], { type: 'audio/wav' });
+}
+
 $('#sp-file').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   e.target.value = '';
   if (!file) return;
-  if (file.size > 2e6) { toast('Arquivo grande demais (máximo 2 MB).'); return; }
-  let duration;
+  if (file.size > 60e6) { toast('Arquivo grande demais (máximo 60 MB).'); return; }
+  let buffer;
   try {
-    duration = (await audioCtx().decodeAudioData(await file.arrayBuffer())).duration;
+    buffer = await audioCtx().decodeAudioData(await file.arrayBuffer());
   } catch {
     toast('Não consegui ler esse áudio. Tente MP3, OGG ou WAV.');
     return;
   }
-  if (duration > 10.05) { toast(`Esse som tem ${duration.toFixed(1)} s. O máximo é 10 segundos.`, 4000); return; }
-  SP.pendingFile = file;
+  const longo = buffer.duration > MAX_SOUND_SECONDS + 0.05;
+  const duration = Math.min(buffer.duration, MAX_SOUND_SECONDS);
+  // Som longo (ou arquivo pesado demais): usa só os primeiros 10 s.
+  SP.pendingFile = longo || file.size > 2e6 ? await trimToWav(buffer, duration) : file;
   SP.pendingDuration = duration;
   $('#snd-name').value = file.name.replace(/\.[^.]+$/, '').slice(0, 32);
-  $('#snd-info').textContent = `${file.name} · ${duration.toFixed(1)} s`;
+  $('#snd-info').textContent = longo
+    ? `${file.name} · tem ${buffer.duration.toFixed(1)} s, vai usar só os primeiros ${MAX_SOUND_SECONDS} s`
+    : `${file.name} · ${duration.toFixed(1)} s`;
   $('#snd-error').textContent = '';
   openModal('#modal-sound');
   $('#snd-name').select();
@@ -272,7 +302,7 @@ $('#form-sound').addEventListener('submit', async (e) => {
   e.preventDefault();
   const file = SP.pendingFile;
   if (!file || !SP.serverId) return;
-  const ext = file.name.split('.').pop().toLowerCase();
+  const ext = (file.name || '').split('.').pop().toLowerCase();
   const type = file.type || AUDIO_EXT[ext] || 'audio/mpeg';
   const name = $('#snd-name').value.trim() || 'Som';
   $('#snd-send').disabled = true;
