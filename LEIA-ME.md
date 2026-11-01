@@ -4,11 +4,11 @@ Call de voz com os amigos e transmissão de tela em 720p. Funciona pelo site e p
 
 ## Como funciona (em português claro)
 
-- **O servidor só apresenta os amigos uns aos outros.** Ele é minúsculo e roda de graça.
+- **O servidor guarda contas, servidores e mensagens, e apresenta os amigos uns aos outros.** Ele é pequeno e roda de graça.
 - **A voz e a tela vão direto do seu PC para o PC do amigo** (peer-to-peer). Não passam pelo servidor, então ele não precisa de internet boa nem de máquina forte.
 - **A tela só é enviada para quem clicou em "Assistir".** Se ninguém está assistindo, você não gasta internet com isso.
-- Os **códigos de convite não expiram** e continuam valendo mesmo se o servidor reiniciar.
-- Cabem até **8 pessoas** por call. Isso é pensado para um grupo de amigos.
+- Cada servidor tem um **código de convite fixo**: entrou uma vez, fica na sua conta.
+- Cabem até **10 pessoas** por call. Isso é pensado para um grupo de amigos.
 
 ## Passo 1: colocar o servidor no ar (grátis, uns 10 minutos)
 
@@ -48,14 +48,26 @@ Vamos usar o **Render.com**, que tem plano gratuito e entrega o site com `https:
 
 ## Usando
 
-1. Abra o DLS Call e digite seu nome.
-2. **Criar um convite** gera um código (ex.: `K7PQ-M2XA`) e já te coloca na call. Clique no código para copiar e mande para os amigos.
-3. Os amigos colam o código e clicam em **Entrar na call**.
-4. **Compartilhar tela**: escolha a tela ou janela e a fluidez (30 fps leve / 60 fps), depois clique em **Ao vivo**.
-   - "Transmitir som do PC" manda o áudio do jogo/vídeo. **Use fone**, senão seus amigos escutam o eco da própria voz.
-5. Quem quiser ver clica em **Assistir**. Clique no vídeo para ampliar, duplo clique para tela cheia.
-6. Clique no nome de um amigo na lista para ajustar o volume dele.
-7. Engrenagem: escolher o microfone e ligar/desligar a redução de ruído.
+1. Abra o DLS Call e **crie uma conta** (usuário + senha). Anote a senha: não dá para recuperar.
+   Nas próximas vezes o app já abre logado.
+2. No **+** da barra da esquerda: **crie um servidor** ou **entre em um com o código de convite** (ex.: `K7PQ-M2XA`).
+   O servidor fica salvo na sua conta, como no Discord. O código fica na engrenagem ao lado do nome do servidor.
+3. **#chat**: mensagens ficam salvas. Enter manda, Shift+Enter pula linha. Link de imagem/GIF aparece direto.
+4. **🔊 Geral**: entra na call. Dá para ver quem está na call mesmo sem entrar.
+5. **Compartilhar tela**: escolha a tela ou janela e a fluidez (30 fps leve / 60 fps), depois clique em **Ao vivo**.
+   "Transmitir som do PC" manda o áudio do jogo/vídeo (no `.exe`, a voz dos amigos fica de fora, sem eco).
+6. Quem quiser ver clica em **Assistir**. Clique no vídeo para ampliar, duplo clique para tela cheia.
+7. **Ouvir junto**: cole um link do YouTube e toca para todos, sincronizado.
+8. **Soundpad**: sons de até 10 s do servidor. Clique no som ou defina uma tecla (F1–F12, teclado numérico ou Ctrl/Alt/Shift + tecla).
+   No `.exe`, a tecla funciona mesmo com o jogo aberto, enquanto você estiver na call.
+9. **Engrenagem de baixo** (configurações):
+   - **Meu perfil**: nome, foto (imagem ou GIF) e banner (imagem, GIF ou cor).
+   - **Aparência**: wallpaper com desfoque e escurecimento (fica salvo na conta).
+   - **Voz e áudio**: microfone, saída de som e redução de ruído (ficam salvos no PC).
+10. Clique no nome de um amigo na call para ajustar o volume dele, ou na lista de membros para ver o perfil.
+
+**Onde os dados ficam:** contas, servidores, mensagens, fotos e sons ficam no banco de dados grátis do **Neon**
+(variável `DATABASE_URL` no Render). Sem ela, o servidor usa um banco temporário que some quando reinicia.
 
 ## Se algum amigo não conseguir conectar
 
@@ -79,8 +91,10 @@ Abra duas abas para simular duas pessoas.
 ```
 dls-call/
   server/            servidor + site (é isso que vai para o Render)
-    server.js        convites e "apresentação" entre os amigos
-    public/          a interface (HTML, CSS, JS)
+    server.js        contas, servidores, chat, arquivos e "apresentação" entre os amigos
+    db.js            banco de dados (Neon na internet, PGlite no seu PC)
+    public/          a interface: core.js (base), app.js (telas), chat.js, voice.js (call e tela),
+                     music.js (Ouvir junto), soundpad.js
   desktop/           app .exe (Electron)
     main.js          janela, seletor de telas, espera o servidor acordar
     config.json      endereço do servidor (o gerar-exe.bat preenche)
